@@ -1,0 +1,5 @@
+name: task_manager
+environment:
+  sdk: '^3.7.0'
+dependencies:
+  ansi_styles: '^0.3.2+1'
