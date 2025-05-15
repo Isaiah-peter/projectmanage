@@ -1,0 +1,21 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "ansi_styles",
+      "rootUri": "file:///C:/Users/USER/AppData/Local/Pub/Cache/hosted/pub.dev/ansi_styles-0.3.2+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "task_manager",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    }
+  ],
+  "generated": "2025-05-14T08:11:29.111199Z",
+  "generator": "pub",
+  "generatorVersion": "3.7.3",
+  "pubCache": "file:///C:/Users/USER/AppData/Local/Pub/Cache"
+}
