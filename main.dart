@@ -37,27 +37,39 @@ void main(List<String> arg) async {
       if (arg.length > 1 && arg[1].startsWith('--sort=')) {
         sortBy = arg[1].split('=')[1];
       }
+
       if (tasks.isEmpty) {
         print("No task found");
-      } else if (arg.length > 1) {
-        listFliter(tasks, arg[1]);
-      } else {
-        if (sortBy == 'dueDate') {
-          tasks.sort((a, b) =>
-              DateTime.parse(a['dueDate']).compareTo(DateTime.parse(b['dueDate'])));
-        } else if (sortBy == 'priority') {
-          const order = {'high': 0, 'medium': 1, 'low': 2};
-          tasks.sort((a, b) =>
-              order[a['priority']]!.compareTo(order[b['priority']]!));
-        }
+        return;
+      }
 
-        for (int i = 0; i < tasks.length; i++) {
-          final t = tasks[i];
-          final status = t['done'] ? AnsiStyles.green('[X]') : AnsiStyles.yellow('[ ]');
-          final prio = colorPriority(t['priority']);
-          print('$i. $status ${t['description']} '
-                '(${AnsiStyles.cyan(t['dueDate'])}) $prio');
-        }
+      if (arg.length > 1 && !arg[1].contains('=')) {
+        listFliter(tasks, arg[1], arg[2]);
+        return;
+      }
+
+      if (sortBy == 'dueDate') {
+        tasks.sort(
+          (a, b) => DateTime.parse(
+            a['dueDate'],
+          ).compareTo(DateTime.parse(b['dueDate'])),
+        );
+      } else if (sortBy == 'priority') {
+        const order = {'high': 0, 'medium': 1, 'low': 2};
+        tasks.sort(
+          (a, b) => order[a['priority']]!.compareTo(order[b['priority']]!),
+        );
+      }
+
+      for (int i = 0; i < tasks.length; i++) {
+        final t = tasks[i];
+        final status =
+            t['done'] ? AnsiStyles.green('[X]') : AnsiStyles.yellow('[ ]');
+        final prio = colorPriority(t['priority']);
+        print(
+          '$i. $status ${t['description']} '
+          '(${AnsiStyles.cyan(t['dueDate'])}) $prio',
+        );
       }
       break;
 
@@ -144,11 +156,11 @@ void printUsage() {
   );
 }
 
-void listFliter(List<Map<String, dynamic>> tasks, String filter) {
+void listFliter(List<Map<String, dynamic>> tasks, String filter, String value) {
   if (tasks.isEmpty) {
     print("No task found");
   } else {
-    for (var task in tasks.where((t) => t['priority'] == filter)) {
+    for (var task in tasks.where((t) => t['$filter'] == value)) {
       int i = 1;
       final status =
           task['done'] ? AnsiStyles.green('[X]') : AnsiStyles.yellow('[ ]');
