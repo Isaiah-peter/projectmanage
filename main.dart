@@ -24,6 +24,7 @@ void main(List<String> arg) async {
       }
       await addTask(arg[1], arg[2], arg[3]);
       print(AnsiStyles.green("task succesfully added"));
+      await closeDB();
       break;
     case 'list':
       var tasks = await getTasks();
@@ -36,13 +37,17 @@ void main(List<String> arg) async {
       for (int i = 0; i < tasks.length; i++) {
         final t = tasks[i];
         final status =
-            t['done'] ? AnsiStyles.green('[X]') : AnsiStyles.yellow('[ ]');
+            t['status'] == 'Done'
+                ? AnsiStyles.green('[X]')
+                : AnsiStyles.yellow('[ ]');
         final prio = colorPriority(t['priority']);
         print(
           '$i. $status ${t['description']} '
-          '(${AnsiStyles.cyan(t['dueDate'])}) $prio',
+          '(${AnsiStyles.cyan(t['due'])}) $prio',
         );
       }
+
+      await closeDB();
       break;
 
     case 'done':
@@ -57,6 +62,7 @@ void main(List<String> arg) async {
 
       await markDone(int.parse(arg[2]));
       print(AnsiStyles.green('task mark as done Nice Job'));
+      await closeDB();
       break;
 
     case 'delete':
@@ -67,6 +73,7 @@ void main(List<String> arg) async {
 
       await deleteTask(int.parse(arg[1]));
       print("task successfully deleted");
+      await closeDB();
       break;
 
     default:

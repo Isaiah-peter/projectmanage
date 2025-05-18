@@ -18,10 +18,17 @@ Future<void> ConnectDB() async {
   );
 }
 
+Future<void> closeDB() async {
+  if (conn.isOpen) {
+    await conn.close();
+  }
+}
+
+
 
 Future<void> addTask(String desc, String due, String priority) async {
   await conn.execute(
-    'INSERT INTO tasks (description, due, priority, status) VALUES (@desc, @due, @priority, @status)',
+    Sql.named('INSERT INTO tasks (description, due, priority, status) VALUES (@desc, @due, @priority, @status)'),
     parameters: {
       'desc': desc,
       'due': due,
@@ -32,7 +39,7 @@ Future<void> addTask(String desc, String due, String priority) async {
 }
 
 Future<List<Map<String, dynamic>>> getTasks() async {
-  final result = await conn.execute('SELECT * FROM tasks ORDER BY id');
+  final result = await conn.execute(Sql.named('SELECT * FROM tasks ORDER BY id'));
   return result
       .map(
         (row) => {
@@ -48,14 +55,14 @@ Future<List<Map<String, dynamic>>> getTasks() async {
 
 Future<void> markDone(int id) async {
   await conn.execute(
-    'UPDATE tasks SET status = \'Done\' WHERE id = @id',
+    Sql.named('UPDATE tasks SET status = \'Done\' WHERE id = @id'),
     parameters: {'id': id},
   );
 }
 
 Future<void> deleteTask(int id) async {
   await conn.execute(
-    'DELETE FROM tasks WHERE id = @id',
+    Sql.named('DELETE FROM tasks WHERE id = @id'),
     parameters: {'id': id},
   );
 }
