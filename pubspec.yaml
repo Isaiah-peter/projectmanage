@@ -3,3 +3,6 @@ environment:
   sdk: '^3.7.0'
 dependencies:
   ansi_styles: '^0.3.2+1'
+  postgres: '^3.5.6'
+  enven: '^1.2.1'
+

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:ansi_styles/ansi_styles.dart';
+import 'database.dart';
 
 const String filename = 'task.json';
 
@@ -10,8 +11,8 @@ void main(List<String> arg) async {
     return;
   }
 
+  await ConnectDB();
   final command = arg[0];
-  final tasks = await loadTasks();
 
   switch (command) {
     case 'add':
@@ -21,56 +22,32 @@ void main(List<String> arg) async {
         );
         return;
       }
-
-      final task = {
-        'description': arg[1],
-        'dueDate': arg[2],
-        'priority': arg[3],
-        'done': false,
-      };
-      tasks.add(task);
-      await saveTask(tasks);
+      await addTask(arg[1], arg[2], arg[3]);
       print(AnsiStyles.green("task succesfully added"));
+      await closeDB();
       break;
     case 'list':
-      String sortBy = '';
-      if (arg.length > 1 && arg[1].startsWith('--sort=')) {
-        sortBy = arg[1].split('=')[1];
-      }
+      var tasks = await getTasks();
 
       if (tasks.isEmpty) {
         print("No task found");
         return;
       }
 
-      if (arg.length > 1 && !arg[1].contains('=')) {
-        listFliter(tasks, arg[1], arg[2]);
-        return;
-      }
-
-      if (sortBy == 'dueDate') {
-        tasks.sort(
-          (a, b) => DateTime.parse(
-            a['dueDate'],
-          ).compareTo(DateTime.parse(b['dueDate'])),
-        );
-      } else if (sortBy == 'priority') {
-        const order = {'high': 0, 'medium': 1, 'low': 2};
-        tasks.sort(
-          (a, b) => order[a['priority']]!.compareTo(order[b['priority']]!),
-        );
-      }
-
       for (int i = 0; i < tasks.length; i++) {
         final t = tasks[i];
         final status =
-            t['done'] ? AnsiStyles.green('[X]') : AnsiStyles.yellow('[ ]');
+            t['status'] == 'Done'
+                ? AnsiStyles.green('[X]')
+                : AnsiStyles.yellow('[ ]');
         final prio = colorPriority(t['priority']);
         print(
           '$i. $status ${t['description']} '
-          '(${AnsiStyles.cyan(t['dueDate'])}) $prio',
+          '(${AnsiStyles.cyan(t['due'])}) $prio',
         );
       }
+
+      await closeDB();
       break;
 
     case 'done':
@@ -83,15 +60,9 @@ void main(List<String> arg) async {
         return;
       }
 
-      final index = int.tryParse(arg[1]);
-      if (index == null || index < 0 || index > tasks.length) {
-        print("enter a valid task number between 0-${tasks.length}");
-        return;
-      }
-
-      tasks[index]['done'] = true;
-      await saveTask(tasks);
+      await markDone(int.parse(arg[2]));
       print(AnsiStyles.green('task mark as done Nice Job'));
+      await closeDB();
       break;
 
     case 'delete':
@@ -100,15 +71,9 @@ void main(List<String> arg) async {
         return;
       }
 
-      final index = int.tryParse(arg[1]);
-      if (index == null || index < 0 || index > tasks.length) {
-        print("enter a valid task number between 0-${tasks.length}");
-        return;
-      }
-
-      tasks.remove(index);
-      await saveTask(tasks);
+      await deleteTask(int.parse(arg[1]));
       print("task successfully deleted");
+      await closeDB();
       break;
 
     default:
